@@ -1,6 +1,7 @@
 package com.matheushenrique.lumi.config;
 
 import com.matheushenrique.lumi.exceptions.RegraNegocioException;
+import com.mongodb.ConnectionString;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -41,6 +42,12 @@ public class ConfiguracaoLocal {
         conferirMongoUri(arquivo);
     }
 
+    // usado na tela de erro para mostrar onde o arquivo foi procurado
+    public static String descricaoArquivo() {
+        Path arquivo = encontrarArquivo();
+        return arquivo != null ? arquivo + " (encontrado)" : PASTA.resolve("config.properties") + " (NÃO encontrado)";
+    }
+
     // aceita também o erro comum do Windows de salvar como "config.properties.txt"
     private static Path encontrarArquivo() {
         for (String nome : new String[]{"config.properties", "config.properties.txt", "config.txt"}) {
@@ -79,6 +86,20 @@ public class ConfiguracaoLocal {
         }
         if (uri.contains("<db_password>") || uri.contains("<") || uri.contains(">")) {
             throw new RegraNegocioException("Na MONGODB_URI, troque <db_password> pela senha do usuário do banco (sem os sinais < e >).");
+        }
+        if (uri.contains(" ")) {
+            throw new RegraNegocioException("A MONGODB_URI tem um espaço no meio. Confira se o endereço está todo em uma linha só.");
+        }
+        try {
+            new ConnectionString(uri); // mesma validação que o driver do MongoDB faz
+        } catch (IllegalArgumentException e) {
+            String motivo = String.valueOf(e.getMessage());
+            if (motivo.contains("urlencoded") || motivo.contains("user information") || motivo.contains("password")) {
+                throw new RegraNegocioException("A senha dentro da MONGODB_URI tem caractere especial (@ : / ? # %). "
+                        + "No Atlas, em Database Access, troque a senha do usuário por uma só com letras e números.", e);
+            }
+            throw new RegraNegocioException("A MONGODB_URI está em formato inválido. Copie de novo o endereço do Atlas "
+                    + "(Connect > Drivers > Java). Detalhe: " + motivo, e);
         }
         System.setProperty("MONGODB_URI", uri);
     }

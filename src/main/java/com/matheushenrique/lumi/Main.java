@@ -200,8 +200,8 @@ public class Main extends Application {
     private void mostrarErroConexao() {
         Label mensagem = Componentes.texto(erroAoIniciar, "auth-subtitle");
         mensagem.setWrapText(true);
-        Label ajuda = Componentes.texto("Confira a variável MONGODB_URI, sua internet e se o seu IP está liberado "
-                + "em Network Access no MongoDB Atlas. Veja o README.", "muted");
+        Label ajuda = Componentes.texto("Arquivo de configuração: " + ConfiguracaoLocal.descricaoArquivo()
+                + "\nConfira também sua internet e se o seu IP está liberado em Network Access no MongoDB Atlas.", "muted");
         ajuda.setWrapText(true);
         Componentes.BotaoCarregando tentarDeNovo = new Componentes.BotaoCarregando("Tentar novamente");
         tentarDeNovo.setMaxWidth(200);
