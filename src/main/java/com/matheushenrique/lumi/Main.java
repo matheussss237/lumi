@@ -1,6 +1,7 @@
 package com.matheushenrique.lumi;
 
 import com.matheushenrique.lumi.business.*;
+import com.matheushenrique.lumi.config.ConfiguracaoLocal;
 import com.matheushenrique.lumi.controller.ChatController;
 import com.matheushenrique.lumi.controller.LoginController;
 import com.matheushenrique.lumi.controller.TemaController;
@@ -83,6 +84,7 @@ public class Main extends Application {
     }
 
     private boolean ligarSpring() {
+        ConfiguracaoLocal.carregar(); // lê %USERPROFILE%\.lumi\config.properties e confere a MONGODB_URI
         spring = new SpringApplicationBuilder(LumiApplication.class).headless(false).run();
         spring.getBean(MongoTemplate.class).executeCommand("{ ping: 1 }"); // testa a conexão
         usarServicos(spring.getBean(UsuarioService.class), spring.getBean(ConversaService.class),
